@@ -42,7 +42,7 @@
                 this.dx = Math.cos(angle) * 1; // Fixed speed
                 this.dy = -Math.sin(angle) * 1; // Fixed speed
                 this.hue = Math.random() * 360; // Random initial color
-                this.enableCollision = true; // Enable collision resolution by default
+                this.colorChangeSpeed = 0.5; // Speed of color change
             }
 
             draw() {
@@ -57,7 +57,7 @@
                 this.x += this.dx;
                 this.y += this.dy;
 
-                this.hue += 0.5; // Smooth color change
+                this.hue += this.colorChangeSpeed; // Smooth color change
                 if (this.hue >= 360) this.hue = 0;
 
                 if (this.x + this.radius > canvas.width || this.x - this.radius < 0) {
@@ -69,8 +69,6 @@
             }
 
             checkCollision(otherBubble) {
-                if (!this.enableCollision || !otherBubble.enableCollision) return false;
-
                 const dx = this.x - otherBubble.x;
                 const dy = this.y - otherBubble.y;
                 const distance = Math.sqrt(dx * dx + dy * dy);
@@ -78,27 +76,35 @@
             }
 
             resolveCollision(otherBubble) {
-                if (!this.enableCollision || !otherBubble.enableCollision) return;
-
                 const dx = this.x - otherBubble.x;
                 const dy = this.y - otherBubble.y;
                 const distance = Math.sqrt(dx * dx + dy * dy);
-                if (distance < this.radius + otherBubble.radius) {
-                    const overlap = (this.radius + otherBubble.radius - distance) / 2;
+                const overlap = (this.radius + otherBubble.radius) - distance;
 
+                if (overlap > 0) {
                     const angle = Math.atan2(dy, dx);
-                    const sin = Math.sin(angle);
-                    const cos = Math.cos(angle);
+                    const moveX = overlap * Math.cos(angle) / 2;
+                    const moveY = overlap * Math.sin(angle) / 2;
 
-                    const thisNewX = this.x + overlap * cos;
-                    const thisNewY = this.y + overlap * sin;
-                    const otherNewX = otherBubble.x - overlap * cos;
-                    const otherNewY = otherBubble.y - overlap * sin;
+                    this.x += moveX;
+                    this.y += moveY;
+                    otherBubble.x -= moveX;
+                    otherBubble.y -= moveY;
 
-                    this.x = thisNewX;
-                    this.y = thisNewY;
-                    otherBubble.x = otherNewX;
-                    otherBubble.y = otherNewY;
+                    // Adjust velocities for a basic elastic collision
+                    const thisMass = this.radius;
+                    const otherMass = otherBubble.radius;
+                    const totalMass = thisMass + otherMass;
+
+                    const newDx1 = (this.dx * (thisMass - otherMass) + (2 * otherMass * otherBubble.dx)) / totalMass;
+                    const newDy1 = (this.dy * (thisMass - otherMass) + (2 * otherMass * otherBubble.dy)) / totalMass;
+                    const newDx2 = (otherBubble.dx * (otherMass - thisMass) + (2 * thisMass * this.dx)) / totalMass;
+                    const newDy2 = (otherBubble.dy * (otherMass - thisMass) + (2 * thisMass * this.dy)) / totalMass;
+
+                    this.dx = newDx1;
+                    this.dy = newDy1;
+                    otherBubble.dx = newDx2;
+                    otherBubble.dy = newDy2;
                 }
             }
         }
@@ -108,25 +114,6 @@
         function addBubble() {
             if (bubbles.length < 25) {
                 const newBubble = new Bubble();
-                let collisionDetected = false;
-
-                // Check if the new bubble collides with any existing bubble
-                for (let i = 0; i < bubbles.length; i++) {
-                    if (newBubble.checkCollision(bubbles[i])) {
-                        collisionDetected = true;
-                        break;
-                    }
-                }
-
-                // If collision detected, wait for 0.5 seconds before enabling collision resolution
-                if (collisionDetected) {
-                    newBubble.enableCollision = false;
-                    setTimeout(() => {
-                        newBubble.enableCollision = true;
-                    }, 500);
-                }
-
-                // Add the new bubble
                 bubbles.push(newBubble);
             }
         }

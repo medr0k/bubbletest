@@ -35,12 +35,12 @@
 
         class Bubble {
             constructor() {
-                this.radius = 80; // Bubble size
+                this.radius = 100; // Bubble size
                 this.x = this.radius; // Start from bottom left corner
                 this.y = canvas.height - this.radius; // Start from bottom edge
                 const angle = (Math.random() * Math.PI / 4) + (Math.PI / 8); // Random angle within 45 degrees upwards
-                this.dx = Math.cos(angle) * 1; // Fixed speed
-                this.dy = -Math.sin(angle) * 1; // Fixed speed
+                this.dx = Math.cos(angle) * 2; // Fixed speed
+                this.dy = -Math.sin(angle) * 2; // Fixed speed
                 this.hue = Math.random() * 360; // Random initial color
                 this.colorChangeSpeed = 0.5; // Speed of color change
             }
@@ -115,6 +115,7 @@
             if (bubbles.length < 25) {
                 const newBubble = new Bubble();
                 bubbles.push(newBubble);
+                console.log('Bubble added:', newBubble);
             }
         }
 
@@ -137,7 +138,13 @@
             requestAnimationFrame(animate);
         }
 
-        bubbleImage.onload = animate;
+        bubbleImage.onload = () => {
+            console.log('Image loaded');
+            animate();
+        };
+        bubbleImage.onerror = (err) => {
+            console.error('Error loading image:', err);
+        };
     });
 </script>
 </body>

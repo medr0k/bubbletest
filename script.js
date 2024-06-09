@@ -15,8 +15,8 @@ document.addEventListener("DOMContentLoaded", () => {
 
     class Bubble {
         constructor() {
-            this.radius = Math.random() * 20 + 30; // Bubble size between 30 and 50 pixels
-            this.x = 0;
+            this.radius = 40; // Fixed bubble size
+            this.x = Math.random() * canvas.width;
             this.y = canvas.height;
             this.dx = (Math.random() - 0.5) * 4;
             this.dy = -(Math.random() * 3 + 1);

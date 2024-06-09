@@ -16,11 +16,11 @@ document.addEventListener("DOMContentLoaded", () => {
     class Bubble {
         constructor() {
             this.radius = 40; // Fixed bubble size
-            this.x = Math.random() * canvas.width;
-            this.y = canvas.height;
-            this.dx = (Math.random() - 0.5) * 4;
-            this.dy = -(Math.random() * 3 + 1);
-            this.hue = Math.random() * 360;
+            this.x = Math.random() * (canvas.width - 2 * this.radius) + this.radius;
+            this.y = Math.random() * (canvas.height - 2 * this.radius) + this.radius;
+            this.dx = Math.random() * 4 - 2; // Random velocity
+            this.dy = Math.random() * 4 - 2; // Random velocity
+            this.hue = 0; // Initial color
         }
 
         draw() {
@@ -34,7 +34,7 @@ document.addEventListener("DOMContentLoaded", () => {
         update() {
             this.x += this.dx;
             this.y += this.dy;
-            this.hue += 1;
+            this.hue += 1; // Change color progressively
 
             if (this.x + this.radius > canvas.width || this.x - this.radius < 0) {
                 this.dx = -this.dx;

@@ -82,30 +82,27 @@ document.addEventListener("DOMContentLoaded", () => {
 
     function addBubble() {
         if (bubbles.length < 25) {
-            bubbles.push(new Bubble());
-        }
-    }
+            const newBubble = new Bubble();
+            let collisionDetected = false;
 
-    setInterval(addBubble, 1000); // Add a new bubble every second until there are 25
-
-    function animate() {
-        ctx.clearRect(0, 0, canvas.width, canvas.height);
-
-        for (let i = 0; i < bubbles.length; i++) {
-            bubbles[i].update();
-            bubbles[i].draw();
-
-            for (let j = i + 1; j < bubbles.length; j++) {
-                if (bubbles[i].checkCollision(bubbles[j])) {
-                    setTimeout(() => {
-                        bubbles[i].resolveCollision(bubbles[j]);
-                    }, 200); // Wait 0.2 seconds before resolving collision
+            // Check if the new bubble collides with any existing bubble
+            for (let i = 0; i < bubbles.length; i++) {
+                if (newBubble.checkCollision(bubbles[i])) {
+                    collisionDetected = true;
+                    break;
                 }
             }
-        }
 
-        requestAnimationFrame(animate);
+            // If collision detected, wait for 0.5 seconds before enabling collision resolution
+            if (collisionDetected) {
+                setTimeout(() => {
+                    bubbles.forEach(bubble => bubble.enableCollision = true);
+                }, 500);
+            }
+
+            // Add the new bubble
+            bubbles.push(newBubble);
+        }
     }
 
-    bubbleImage.onload = animate;
-});
+    setInterval(addBubble, 1000);

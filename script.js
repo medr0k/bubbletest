@@ -35,7 +35,7 @@
 
         class Bubble {
             constructor() {
-                this.radius = 100; // Bubble size
+                this.radius = 80; // Bubble size
                 this.x = this.radius; // Start from bottom left corner
                 this.y = canvas.height - this.radius; // Start from bottom edge
                 const angle = (Math.random() * Math.PI / 4) + (Math.PI / 8); // Random angle within 45 degrees upwards
@@ -43,6 +43,10 @@
                 this.dy = -Math.sin(angle) * 2; // Fixed speed
                 this.hue = Math.random() * 360; // Random initial color
                 this.colorChangeSpeed = 0.5; // Speed of color change
+                this.enableCollision = false;
+                setTimeout(() => {
+                    this.enableCollision = true;
+                }, 500); // Enable collision after 0.5 seconds
             }
 
             draw() {
@@ -69,6 +73,8 @@
             }
 
             checkCollision(otherBubble) {
+                if (!this.enableCollision || !otherBubble.enableCollision) return false;
+
                 const dx = this.x - otherBubble.x;
                 const dy = this.y - otherBubble.y;
                 const distance = Math.sqrt(dx * dx + dy * dy);

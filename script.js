@@ -97,7 +97,9 @@ document.addEventListener("DOMContentLoaded", () => {
 
             for (let j = i + 1; j < bubbles.length; j++) {
                 if (bubbles[i].checkCollision(bubbles[j])) {
-                    bubbles[i].resolveCollision(bubbles[j]);
+                    setTimeout(() => {
+                        bubbles[i].resolveCollision(bubbles[j]);
+                    }, 200); // Wait 0.2 seconds before resolving collision
                 }
             }
         }

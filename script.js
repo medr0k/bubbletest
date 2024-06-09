@@ -15,23 +15,30 @@ document.addEventListener("DOMContentLoaded", () => {
 
     class Bubble {
         constructor() {
-            this.radius = 80; // Increased bubble size
+            this.radius = 80; // Bubble size
             this.x = Math.random() * canvas.width * 0.5; // Start from bottom left corner
             this.y = canvas.height - this.radius; // Start from bottom edge
             const angle = (Math.random() * Math.PI / 4) - Math.PI / 8; // Random angle within -22.5 to 22.5 degrees
             this.dx = Math.cos(angle) * 1; // Fixed speed
             this.dy = -Math.sin(angle) * 1; // Fixed speed
-            this.hue = 0; // Initial color
+            this.hue = Math.random() * 360; // Random initial color
             this.enableCollision = true; // Enable collision resolution by default
         }
 
         draw() {
+            ctx.save();
+            ctx.globalCompositeOperation = 'source-over';
+            ctx.filter = `hue-rotate(${this.hue}deg)`;
             ctx.drawImage(bubbleImage, this.x - this.radius, this.y - this.radius, this.radius * 2, this.radius * 2);
+            ctx.restore();
         }
 
         update() {
             this.x += this.dx;
             this.y += this.dy;
+
+            this.hue += 0.5; // Smooth color change
+            if (this.hue >= 360) this.hue = 0;
 
             if (this.x + this.radius > canvas.width || this.x - this.radius < 0) {
                 this.dx = -this.dx;
@@ -76,6 +83,11 @@ document.addEventListener("DOMContentLoaded", () => {
             this.dy = Math.sin(angle) * finalDx1 + Math.sin(angle + Math.PI / 2) * finalDy1;
             otherBubble.dx = Math.cos(angle) * finalDx2 + Math.cos(angle + Math.PI / 2) * finalDy2;
             otherBubble.dy = Math.sin(angle) * finalDx2 + Math.sin(angle + Math.PI / 2) * finalDy2;
+
+            this.x += this.dx;
+            this.y += this.dy;
+            otherBubble.x += otherBubble.dx;
+            otherBubble.y += otherBubble.dy;
         }
     }
 
@@ -107,7 +119,7 @@ document.addEventListener("DOMContentLoaded", () => {
         }
     }
 
-    setInterval(addBubble, 1000); // Add a new bubble every second until there are 25
+    setInterval(addBubble, 500); // Add a new bubble every half second until there are 25
 
     function animate() {
         ctx.clearRect(0, 0, canvas.width, canvas.height);

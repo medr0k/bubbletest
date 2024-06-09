@@ -15,23 +15,18 @@ document.addEventListener("DOMContentLoaded", () => {
 
     class Bubble {
         constructor() {
-            this.radius = 60; // Increased bubble size
+            this.radius = 80; // Increased bubble size
             this.x = Math.random() * canvas.width * 0.5; // Start from bottom left corner
             this.y = canvas.height;
-            const angle = Math.random() * Math.PI / 4 - Math.PI / 8; // Random angle within -22.5 to 22.5 degrees
-            const speed = Math.random() + 1; // Random speed between 1 and 2
-            this.dx = speed * Math.cos(angle); // Initial velocity in x-direction
-            this.dy = -speed * Math.sin(angle); // Initial velocity in y-direction (negative to move upwards)
+            const speed = 1; // Fixed speed
+            this.dx = speed; // Initial velocity in x-direction
+            this.dy = -speed; // Initial velocity in y-direction (negative to move upwards)
             this.hue = 0; // Initial color
             this.enableCollision = true; // Enable collision resolution by default
         }
 
         draw() {
-            ctx.save();
-            ctx.translate(this.x, this.y);
-            ctx.rotate(this.hue * Math.PI / 180);
-            ctx.drawImage(bubbleImage, -this.radius, -this.radius, this.radius * 2, this.radius * 2);
-            ctx.restore();
+            ctx.drawImage(bubbleImage, this.x - this.radius, this.y - this.radius, this.radius * 2, this.radius * 2);
         }
 
         update() {

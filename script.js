@@ -18,9 +18,12 @@ document.addEventListener("DOMContentLoaded", () => {
             this.radius = 40; // Fixed bubble size
             this.x = Math.random() * (canvas.width - 2 * this.radius) + this.radius;
             this.y = Math.random() * (canvas.height - 2 * this.radius) + this.radius;
-            this.dx = Math.random() * 4 - 2; // Random velocity
-            this.dy = Math.random() * 4 - 2; // Random velocity
+            const angle = Math.random() * Math.PI / 6 - Math.PI / 12; // Random angle within -15 to 15 degrees
+            const speed = Math.random() * 2 + 2; // Random speed between 2 and 4
+            this.dx = speed * Math.cos(angle); // Initial velocity in x-direction
+            this.dy = -speed * Math.sin(angle); // Initial velocity in y-direction (negative to move upwards)
             this.hue = 0; // Initial color
+            this.enableCollision = true; // Enable collision resolution by default
         }
 
         draw() {
@@ -45,6 +48,8 @@ document.addEventListener("DOMContentLoaded", () => {
         }
 
         checkCollision(otherBubble) {
+            if (!this.enableCollision || !otherBubble.enableCollision) return false;
+
             const dx = this.x - otherBubble.x;
             const dy = this.y - otherBubble.y;
             const distance = Math.sqrt(dx * dx + dy * dy);
@@ -52,6 +57,8 @@ document.addEventListener("DOMContentLoaded", () => {
         }
 
         resolveCollision(otherBubble) {
+            if (!this.enableCollision || !otherBubble.enableCollision) return;
+
             const dx = this.x - otherBubble.x;
             const dy = this.y - otherBubble.y;
             const angle = Math.atan2(dy, dx);
@@ -95,8 +102,9 @@ document.addEventListener("DOMContentLoaded", () => {
 
             // If collision detected, wait for 0.5 seconds before enabling collision resolution
             if (collisionDetected) {
+                newBubble.enableCollision = false;
                 setTimeout(() => {
-                    bubbles.forEach(bubble => bubble.enableCollision = true);
+                    newBubble.enableCollision = true;
                 }, 500);
             }
 
@@ -105,4 +113,24 @@ document.addEventListener("DOMContentLoaded", () => {
         }
     }
 
-    setInterval(addBubble, 1000);
+    setInterval(addBubble, 1000); // Add a new bubble every second until there are 25
+
+    function animate() {
+        ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+        for (let i = 0; i < bubbles.length; i++) {
+            bubbles[i].update();
+            bubbles[i].draw();
+
+            for (let j = i + 1; j < bubbles.length; j++) {
+                if (bubbles[i].checkCollision(bubbles[j])) {
+                    bubbles[i].resolveCollision(bubbles[j]);
+                }
+            }
+        }
+
+        requestAnimationFrame(animate);
+    }
+
+    bubbleImage.onload = animate;
+});

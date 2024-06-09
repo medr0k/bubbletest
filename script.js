@@ -15,10 +15,10 @@ document.addEventListener("DOMContentLoaded", () => {
 
     class Bubble {
         constructor() {
-            this.radius = 80; // Increased bubble size
+            this.radius = 120; // Increased bubble size
             this.x = Math.random() * canvas.width * 0.5; // Start from bottom left corner
             this.y = canvas.height;
-            const speed = 1; // Fixed speed
+            const speed = 0.5; // Fixed speed
             this.dx = speed; // Initial velocity in x-direction
             this.dy = -speed; // Initial velocity in y-direction (negative to move upwards)
             this.hue = 0; // Initial color
@@ -32,7 +32,6 @@ document.addEventListener("DOMContentLoaded", () => {
         update() {
             this.x += this.dx;
             this.y += this.dy;
-            this.hue += 1; // Change color progressively
 
             if (this.x + this.radius > canvas.width || this.x - this.radius < 0) {
                 this.dx = -this.dx;
@@ -119,13 +118,4 @@ document.addEventListener("DOMContentLoaded", () => {
 
             for (let j = i + 1; j < bubbles.length; j++) {
                 if (bubbles[i].checkCollision(bubbles[j])) {
-                    bubbles[i].resolveCollision(bubbles[j]);
-                }
-            }
-        }
-
-        requestAnimationFrame(animate);
-    }
-
-    bubbleImage.onload = animate;
-});
+                    bubbles[i].resolveCollision(bubbles

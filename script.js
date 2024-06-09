@@ -32,6 +32,13 @@
 
         const bubbleImage = new Image();
         bubbleImage.src = 'bubble.png'; // Replace with your image path
+        bubbleImage.onload = () => {
+            console.log('Bubble image loaded');
+            animate();
+        };
+        bubbleImage.onerror = (err) => {
+            console.error('Error loading bubble image:', err);
+        };
 
         class Bubble {
             constructor() {
@@ -143,14 +150,6 @@
 
             requestAnimationFrame(animate);
         }
-
-        bubbleImage.onload = () => {
-            console.log('Image loaded');
-            animate();
-        };
-        bubbleImage.onerror = (err) => {
-            console.error('Error loading image:', err);
-        };
     });
 </script>
 </body>

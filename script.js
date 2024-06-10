@@ -25,8 +25,8 @@ class Bubble {
         this.radius = bubbleSize;
         this.x = x;
         this.y = y;
-        this.speedX = 4; // Increased speed range
-        this.speedY = 4; // Increased speed range
+        this.speedX = 1; // Reduced fixed speed for horizontal movement
+        this.speedY = 1; // Reduced fixed speed for vertical movement
         this.opacity = Math.random() * 0.5 + 0.5;
         this.hue = Math.random() * 360; // Starting hue for color
         this.hueChangeRate = 0.5; // Constant rate of hue change
@@ -39,11 +39,21 @@ class Bubble {
         if (this.hue > 360) this.hue -= 360;
 
         // Boundary collision
-        if (this.x - this.radius < 0 || this.x + this.radius > canvas.width) {
-            this.speedX = -this.speedX; // Reverse horizontal speed
+        if (this.x - this.radius < 0) {
+            this.x = this.radius;
+            this.speedX = -this.speedX;
         }
-        if (this.y - this.radius < 0 || this.y + this.radius > canvas.height) {
-            this.speedY = -this.speedY; // Reverse vertical speed
+        if (this.x + this.radius > canvas.width) {
+            this.x = canvas.width - this.radius;
+            this.speedX = -this.speedX;
+        }
+        if (this.y - this.radius < 0) {
+            this.y = this.radius;
+            this.speedY = -this.speedY;
+        }
+        if (this.y + this.radius > canvas.height) {
+            this.y = canvas.height - this.radius;
+            this.speedY = -this.speedY;
         }
 
         // Bubble collision
@@ -105,16 +115,7 @@ class Bubble {
 
     draw() {
         ctx.globalAlpha = this.opacity;
-        ctx.save();
-        ctx.translate(this.x, this.y);
-        ctx.rotate((Math.random() - 0.5) * 0.1); // Slight rotation for visual effect
-        ctx.translate(-this.x, -this.y);
-
-        // Draw bubble with hue shift
-        ctx.filter = `hue-rotate(${this.hue}deg)`;
         ctx.drawImage(bubbleImage, this.x - this.radius, this.y - this.radius, this.radius * 2, this.radius * 2);
-
-        ctx.restore();
         ctx.globalAlpha = 1;
     }
 }
@@ -134,6 +135,24 @@ function animate() {
         bubble.draw();
     });
     requestAnimationFrame(animate);
+}
+
+function hsvToRgb(h, s, v) {
+    let r, g, b;
+    const i = Math.floor(h * 6);
+    const f = h * 6 - i;
+    const p = v * (1 - s);
+    const q = v * (1 - f * s);
+    const t = v * (1 - (1 - f) * s);
+    switch (i % 6) {
+        case 0: r = v, g = t, b = p; break;
+        case 1: r = q, g = v, b = p; break;
+        case 2: r = p, g = v, b = t; break;
+        case 3: r = p, g = q, b = v; break;
+        case 4: r = t, g = p, b = v; break;
+        case 5: r = v, g = p, b = q; break;
+    }
+    return [Math.round(r * 255), Math.round(g * 255), Math.round(b * 255)];
 }
 
 window.addEventListener('resize', () => {

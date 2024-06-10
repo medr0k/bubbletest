@@ -114,9 +114,12 @@ class Bubble {
     }
 
     draw() {
-        ctx.globalAlpha = this.opacity;
-        ctx.drawImage(bubbleImage, this.x - this.radius, this.y - this.radius, this.radius * 2, this.radius * 2);
-        ctx.globalAlpha = 1;
+        // Convert hue to RGB
+        const [r, g, b] = hsvToRgb(this.hue / 360, 1, 1);
+        ctx.fillStyle = `rgba(${r}, ${g}, ${b}, ${this.opacity})`;
+        ctx.beginPath();
+        ctx.arc(this.x, this.y, this.radius, 0, Math.PI * 2);
+        ctx.fill();
     }
 }
 

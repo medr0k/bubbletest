@@ -114,24 +114,24 @@ class Bubble {
     }
 
     draw() {
-        // Draw the bubble image
+        // Create an off-screen canvas
+        const offCanvas = document.createElement('canvas');
+        const offCtx = offCanvas.getContext('2d');
+        offCanvas.width = this.radius * 2;
+        offCanvas.height = this.radius * 2;
+
+        // Draw the image onto the off-screen canvas
+        offCtx.drawImage(bubbleImage, 0, 0, this.radius * 2, this.radius * 2);
+
+        // Apply hue rotation
+        offCtx.globalCompositeOperation = 'source-atop';
+        offCtx.fillStyle = `hsl(${this.hue}, 100%, 50%)`;
+        offCtx.fillRect(0, 0, offCanvas.width, offCanvas.height);
+
+        // Draw the off-screen canvas onto the main canvas
         ctx.globalAlpha = this.opacity;
-        ctx.drawImage(bubbleImage, this.x - this.radius, this.y - this.radius, this.radius * 2, this.radius * 2);
-
-        // Set the composite operation to hue
-        ctx.globalCompositeOperation = 'color';
-
-        // Fill with the hue color
-        ctx.fillStyle = `hsl(${this.hue}, 100%, 50%)`;
-        ctx.beginPath();
-        ctx.arc(this.x, this.y, this.radius, 0, Math.PI * 2);
-        ctx.fill();
-
-        // Reset the composite operation
-        ctx.globalCompositeOperation = 'source-over';
-
-        // Reset alpha
-        ctx.globalAlpha = 1;
+        ctx.drawImage(offCanvas, this.x - this.radius, this.y - this.radius);
+        ctx.globalAlpha = 1; // Reset alpha
     }
 }
 
@@ -150,24 +150,6 @@ function animate() {
         bubble.draw();
     });
     requestAnimationFrame(animate);
-}
-
-function hsvToRgb(h, s, v) {
-    let r, g, b;
-    const i = Math.floor(h * 6);
-    const f = h * 6 - i;
-    const p = v * (1 - s);
-    const q = v * (1 - f * s);
-    const t = v * (1 - (1 - f) * s);
-    switch (i % 6) {
-        case 0: r = v, g = t, b = p; break;
-        case 1: r = q, g = v, b = p; break;
-        case 2: r = p, g = v, b = t; break;
-        case 3: r = p, g = q, b = v; break;
-        case 4: r = t, g = p, b = v; break;
-        case 5: r = v, g = p, b = q; break;
-    }
-    return [Math.round(r * 255), Math.round(g * 255), Math.round(b * 255)];
 }
 
 window.addEventListener('resize', () => {

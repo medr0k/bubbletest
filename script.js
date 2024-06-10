@@ -54,21 +54,22 @@ class Bubble {
         this.hue += this.hueChangeRate; // Change hue over time
         if (this.hue > 360) this.hue -= 360;
 
-        // Boundary collision with halfway phasing
-        if (this.x - this.radius / 2 < 0) {
-            this.x = this.radius / 2;
+        // Extended boundary collision with phasing further into the wall
+        const phaseDistance = this.radius; // Extend the phasing distance to full radius
+        if (this.x - phaseDistance < 0) {
+            this.x = phaseDistance;
             this.speedX = -this.speedX;
         }
-        if (this.x + this.radius / 2 > canvas.width) {
-            this.x = canvas.width - this.radius / 2;
+        if (this.x + phaseDistance > canvas.width) {
+            this.x = canvas.width - phaseDistance;
             this.speedX = -this.speedX;
         }
-        if (this.y - this.radius / 2 < 0) {
-            this.y = this.radius / 2;
+        if (this.y - phaseDistance < 0) {
+            this.y = phaseDistance;
             this.speedY = -this.speedY;
         }
-        if (this.y + this.radius / 2 > canvas.height) {
-            this.y = canvas.height - this.radius / 2;
+        if (this.y + phaseDistance > canvas.height) {
+            this.y = canvas.height - phaseDistance;
             this.speedY = -this.speedY;
         }
 
@@ -130,111 +131,16 @@ class Bubble {
     }
 
     draw() {
-        // Create an off-screen canvas
-        const offCanvas = document.createElement('canvas');
-        const offCtx = offCanvas.getContext('2d');
-        offCanvas.width = this.radius * 2;
-        offCanvas.height = this.radius * 2;
-
-        // Draw the image onto the off-screen canvas
-        offCtx.drawImage(bubbleImage, 0, 0, this.radius * 2, this.radius * 2);
-
-        // Get the image data
-        const imageData = offCtx.getImageData(0, 0, offCanvas.width, offCanvas.height);
-        const data = imageData.data;
-
-        // Modify the hue of non-white pixels
-        for (let i = 0; i < data.length; i += 4) {
-            const r = data[i];
-            const g = data[i + 1];
-            const b = data[i + 2];
-
-            // Check if the pixel is not white
-            if (!(r > 250 && g > 250 && b > 250)) {
-                // Convert RGB to HSL
-                const [h, s, l] = rgbToHsl(r, g, b);
-
-                // Apply the hue rotation
-                const [newR, newG, newB] = hslToRgb((h + this.hueChangeRate) % 360, s, l);
-
-                // Set the new RGB values
-                data[i] = newR;
-                data[i + 1] = newG;
-                data[i + 2] = newB;
-            }
-        }
-
-        // Put the modified image data back onto the canvas
-        offCtx.putImageData(imageData, 0, 0);
-
-        // Draw the off-screen canvas onto the main canvas
         ctx.globalAlpha = this.opacity;
-        ctx.drawImage(offCanvas, this.x - this.radius, this.y - this.radius);
+
+        ctx.save();
+        ctx.translate(this.x, this.y);
+        ctx.rotate((this.hue % 360) * Math.PI / 180);
+        ctx.drawImage(bubbleImage, -this.radius, -this.radius, this.radius * 2, this.radius * 2);
+        ctx.restore();
+
         ctx.globalAlpha = 1; // Reset alpha
     }
-}
-
-// Convert RGB to HSL
-function rgbToHsl(r, g, b) {
-    r /= 255;
-    g /= 255;
-    b /= 255;
-
-    const max = Math.max(r, g, b);
-    const min = Math.min(r, g, b);
-    let h, s, l = (max + min) / 2;
-
-    if (max === min) {
-        h = s = 0; // achromatic
-    } else {
-        const d = max - min;
-        s = l > 0.5 ? d / (2 - max - min) : d / (max + min);
-
-        switch (max) {
-            case r:
-                h = (g - b) / d + (g < b ? 6 : 0);
-                break;
-            case g:
-                h = (b - r) / d + 2;
-                break;
-            case b:
-                h = (r - g) / d + 4;
-                break;
-        }
-
-        h /= 6;
-    }
-
-    return [h * 360, s, l];
-}
-
-// Convert HSL to RGB
-function hslToRgb(h, s, l) {
-    let r, g, b;
-
-    h /= 360;
-
-    if (s === 0) {
-        r = g = b = l; // achromatic
-    } else {
-        const hue2rgb = (p, q, t) => {
-            if (t < 0) t += 1;
-            if (t > 1) t -= 1;
-            if (t < 1 / 6) return p + (q - p) * 6 * t;
-            if (t < 1 / 3) return q;
-            if (t < 1 / 2) return p + (q - p) * (2 / 3 - t) * 6;
-            return p;
-        };
-
-        const q = l < 0.5 ? l * (1 + s) : l + s - l * s;
-        const p = 2 * l - q;
-
-        r = hue2rgb(p, q, h + 1 / 3);
-        g = hue2rgb(p, q, h);
-        b = hue2rgb(p, q, h - 1 / 3);
-    }
-
-    return [r * 255, g * 255, b * 255];
 }
 
 function init() {
@@ -244,7 +150,7 @@ function init() {
         bubbles.push(new Bubble(x, y));
     }
     // Ensure exactly 20 bubbles
-    ensureExactBubbleCount(20);
+    ensureExactBubbleCount(28);
 }
 
 function animate() {
@@ -294,9 +200,9 @@ function ensureExactBubbleCount(count) {
 window.addEventListener('resize', () => {
     canvas.width = window.innerWidth;
     canvas.height = window.innerHeight;
-    ensureExactBubbleCount(20); // Re-check bubble count on resize
+    ensureExactBubbleCount(28); // Re-check bubble count on resize
 });
 
 // Initial setup
-ensureExactBubbleCount(20); // Ensure 20 bubbles at start
+ensureExactBubbleCount(28); // Ensure 20 bubbles at start
 changeGravity(); // Start gravity change cycle

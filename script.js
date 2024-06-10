@@ -4,7 +4,7 @@ canvas.width = window.innerWidth;
 canvas.height = window.innerHeight;
 
 const bubbleImage = new Image();
-bubbleImage.src = 'bubbles.png';
+bubbleImage.src = 'bubble.png';
 
 const bubbles = [];
 const bubbleCount = 100;

@@ -114,10 +114,6 @@ class Bubble {
     }
 
     draw() {
-        // Draw the original bubble image
-        ctx.globalAlpha = this.opacity;
-        ctx.drawImage(bubbleImage, this.x - this.radius, this.y - this.radius, this.radius * 2, this.radius * 2);
-        
         // Create an off-screen canvas
         const offCanvas = document.createElement('canvas');
         const offCtx = offCanvas.getContext('2d');
@@ -140,6 +136,7 @@ class Bubble {
 }
 
 function init() {
+    bubbles.length = 0; // Clear any existing bubbles
     for (let i = 0; i < bubbleCount; i++) {
         const x = Math.random() * (canvas.width - bubbleSize * 2) + bubbleSize;
         const y = Math.random() * (canvas.height - bubbleSize * 2) + bubbleSize;
@@ -159,6 +156,7 @@ function animate() {
 window.addEventListener('resize', () => {
     canvas.width = window.innerWidth;
     canvas.height = window.innerHeight;
+    init(); // Reinitialize bubbles on resize
 });
 
 // Start the animation

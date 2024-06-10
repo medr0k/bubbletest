@@ -3,6 +3,19 @@ const ctx = canvas.getContext('2d');
 canvas.width = window.innerWidth;
 canvas.height = window.innerHeight;
 
+const bubbleImage = new Image();
+bubbleImage.src = 'bubble.png';
+
+bubbleImage.onload = () => {
+    console.log('Image loaded');
+    init();
+    animate();
+};
+
+bubbleImage.onerror = (error) => {
+    console.error('Failed to load image', error);
+};
+
 const bubbles = [];
 const bubbleCount = 20; // Reduced bubble count
 const bubbleSize = 80; // Smaller bubble size
@@ -101,12 +114,17 @@ class Bubble {
     }
 
     draw() {
-        // Convert hue to RGB
-        const [r, g, b] = hsvToRgb(this.hue / 360, 1, 1);
-        ctx.fillStyle = `rgba(${r}, ${g}, ${b}, ${this.opacity})`;
+        // Draw the bubble image
+        ctx.globalAlpha = this.opacity;
+        ctx.drawImage(bubbleImage, this.x - this.radius, this.y - this.radius, this.radius * 2, this.radius * 2);
+
+        // Draw the color overlay
+        ctx.globalAlpha = 0.5; // Adjust the alpha for the color overlay
+        ctx.fillStyle = `hsl(${this.hue}, 100%, 50%)`;
         ctx.beginPath();
         ctx.arc(this.x, this.y, this.radius, 0, Math.PI * 2);
         ctx.fill();
+        ctx.globalAlpha = 1; // Reset alpha
     }
 }
 

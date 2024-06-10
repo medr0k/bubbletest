@@ -19,7 +19,7 @@ bubbleImage.onerror = (error) => {
 const bubbles = [];
 const bubbleCount = 28; // Reduced bubble count
 const bubbleSize = 70; // Smaller bubble size
-const phasedistanse = 50; // Distance at which bubbles start to phase out
+const phaseDistance = bubbleSize / 2; // Allow bubbles to phase halfway into the wall
 
 const gravityDirections = [
     { x: 0, y: -1 }, // Up
@@ -55,21 +55,22 @@ class Bubble {
         this.hue += this.hueChangeRate; // Change hue over time
         if (this.hue > 360) this.hue -= 360;
 
-        // Boundary collision
-        if (this.x - this.radius < 0) {
-            this.x = this.radius;
+        // Boundary collision with phase distance
+        const phaseRadius = this.radius / 2; // Allow bubble to phase halfway into the wall
+        if (this.x - this.radius < -phaseRadius) {
+            this.x = -phaseRadius + this.radius;
             this.speedX = -this.speedX;
         }
-        if (this.x + this.radius > canvas.width) {
-            this.x = canvas.width - this.radius;
+        if (this.x + this.radius > canvas.width + phaseRadius) {
+            this.x = canvas.width + phaseRadius - this.radius;
             this.speedX = -this.speedX;
         }
-        if (this.y - this.radius < 0) {
-            this.y = this.radius;
+        if (this.y - this.radius < -phaseRadius) {
+            this.y = -phaseRadius + this.radius;
             this.speedY = -this.speedY;
         }
-        if (this.y + this.radius > canvas.height) {
-            this.y = canvas.height - this.radius;
+        if (this.y + this.radius > canvas.height + phaseRadius) {
+            this.y = canvas.height + phaseRadius - this.radius;
             this.speedY = -this.speedY;
         }
 

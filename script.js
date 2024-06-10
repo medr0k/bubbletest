@@ -17,8 +17,8 @@ bubbleImage.onerror = (error) => {
 };
 
 const bubbles = [];
-const bubbleCount = 20; // Reduced bubble count
-const bubbleSize = 80; // Smaller bubble size
+const bubbleCount = 28; // Reduced bubble count
+const bubbleSize = 70; // Smaller bubble size
 
 const gravityDirections = [
     { x: 0, y: -1 }, // Up
@@ -31,8 +31,10 @@ const gravityDirections = [
     { x: 1, y: 1 }, // Down-right
 ];
 
-let currentGravityDirection = { x: 0, y: -1 }; // Starting direction
+let currentGravityDirection = { x: 0, y: 0 }; // Starting direction
+let targetGravityDirection = { x: 0, y: -1 }; // Initial target direction
 let lastGravityDirectionIndex = 0; // Index of the last gravity direction
+let gravityChangeInProgress = false; // Flag to track if gravity change is in progress
 
 class Bubble {
     constructor(x, y) {
@@ -170,6 +172,7 @@ function animate() {
         bubble.update();
         bubble.draw();
     });
+    updateGravityDirection();
     requestAnimationFrame(animate);
 }
 
@@ -179,10 +182,26 @@ function changeGravityDirection() {
         newGravityDirectionIndex = Math.floor(Math.random() * gravityDirections.length);
     } while (newGravityDirectionIndex === lastGravityDirectionIndex);
 
-    currentGravityDirection = gravityDirections[newGravityDirectionIndex];
+    targetGravityDirection = gravityDirections[newGravityDirectionIndex];
     lastGravityDirectionIndex = newGravityDirectionIndex;
+}
 
-    setTimeout(changeGravityDirection, 5000); // Change direction every 5 seconds
+function updateGravityDirection() {
+    const step = 0.01; // Adjust the step value to control the smoothness of the transition
+    const dx = targetGravityDirection.x - currentGravityDirection.x;
+    const dy = targetGravityDirection.y - currentGravityDirection.y;
+    
+    if (Math.abs(dx) > step) {
+        currentGravityDirection.x += step * Math.sign(dx);
+    } else {
+        currentGravityDirection.x = targetGravityDirection.x;
+    }
+    
+    if (Math.abs(dy) > step) {
+        currentGravityDirection.y += step * Math.sign(dy);
+    } else {
+        currentGravityDirection.y = targetGravityDirection.y;
+    }
 }
 
 window.addEventListener('resize', () => {
@@ -200,3 +219,4 @@ animate();
 
 // Start changing gravity direction
 changeGravityDirection();
+setInterval(changeGravityDirection, 5000); // Change direction every 5 seconds

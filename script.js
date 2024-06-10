@@ -3,19 +3,6 @@ const ctx = canvas.getContext('2d');
 canvas.width = window.innerWidth;
 canvas.height = window.innerHeight;
 
-const bubbleImage = new Image();
-bubbleImage.src = 'bubble.png';
-
-bubbleImage.onload = () => {
-    console.log('Image loaded');
-    init();
-    animate();
-};
-
-bubbleImage.onerror = (error) => {
-    console.error('Failed to load image', error);
-};
-
 const bubbles = [];
 const bubbleCount = 20; // Reduced bubble count
 const bubbleSize = 80; // Smaller bubble size
@@ -162,3 +149,7 @@ window.addEventListener('resize', () => {
     canvas.width = window.innerWidth;
     canvas.height = window.innerHeight;
 });
+
+// Start the animation
+init();
+animate();

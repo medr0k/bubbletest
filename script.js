@@ -118,13 +118,20 @@ class Bubble {
         ctx.globalAlpha = this.opacity;
         ctx.drawImage(bubbleImage, this.x - this.radius, this.y - this.radius, this.radius * 2, this.radius * 2);
 
-        // Draw the color overlay
-        ctx.globalAlpha = 0.5; // Adjust the alpha for the color overlay
+        // Set the composite operation to hue
+        ctx.globalCompositeOperation = 'color';
+
+        // Fill with the hue color
         ctx.fillStyle = `hsl(${this.hue}, 100%, 50%)`;
         ctx.beginPath();
         ctx.arc(this.x, this.y, this.radius, 0, Math.PI * 2);
         ctx.fill();
-        ctx.globalAlpha = 1; // Reset alpha
+
+        // Reset the composite operation
+        ctx.globalCompositeOperation = 'source-over';
+
+        // Reset alpha
+        ctx.globalAlpha = 1;
     }
 }
 

@@ -6,31 +6,63 @@ canvas.height = window.innerHeight;
 const bubbleImage = new Image();
 bubbleImage.src = 'bubble.png';
 
+bubbleImage.onload = () => {
+    console.log('Image loaded');
+    init();
+    animate();
+};
+
+bubbleImage.onerror = (error) => {
+    console.error('Failed to load image', error);
+};
+
 const bubbles = [];
-const bubbleCount = 100;
+const bubbleCount = 25;
+const bubbleSize = 40;
 
 class Bubble {
-    constructor() {
-        this.radius = Math.random() * 20 + 20;
-        this.x = Math.random() * (canvas.width - this.radius * 2) + this.radius;
-        this.y = Math.random() * (canvas.height - this.radius * 2) + this.radius;
-        this.speed = Math.random() * 1.5 + 0.5;
-        this.angle = Math.random() * Math.PI * 2;
+    constructor(x, y) {
+        this.radius = bubbleSize;
+        this.x = x;
+        this.y = y;
+        this.speedX = (Math.random() - 0.5) * 2;
+        this.speedY = (Math.random() - 0.5) * 2;
         this.opacity = Math.random() * 0.5 + 0.5;
     }
 
     update() {
-        this.x += Math.cos(this.angle) * this.speed;
-        this.y += Math.sin(this.angle) * this.speed;
-        this.angle += Math.random() * 0.1 - 0.05;
+        this.x += this.speedX;
+        this.y += this.speedY;
 
+        // Boundary collision
         if (this.x - this.radius < 0 || this.x + this.radius > canvas.width) {
-            this.angle = Math.PI - this.angle;
+            this.speedX = -this.speedX;
         }
 
         if (this.y - this.radius < 0 || this.y + this.radius > canvas.height) {
-            this.angle = -this.angle;
+            this.speedY = -this.speedY;
         }
+
+        // Bubble collision
+        for (let other of bubbles) {
+            if (this !== other && this.isCollidingWith(other)) {
+                const angle = Math.atan2(this.y - other.y, this.x - other.x);
+                const speed = Math.sqrt(this.speedX * this.speedX + this.speedY * this.speedY);
+
+                this.speedX = -Math.cos(angle) * speed;
+                this.speedY = -Math.sin(angle) * speed;
+
+                other.speedX = Math.cos(angle) * speed;
+                other.speedY = Math.sin(angle) * speed;
+            }
+        }
+    }
+
+    isCollidingWith(other) {
+        const dx = this.x - other.x;
+        const dy = this.y - other.y;
+        const distance = Math.sqrt(dx * dx + dy * dy);
+        return distance < this.radius + other.radius;
     }
 
     draw() {
@@ -41,7 +73,9 @@ class Bubble {
 
 function init() {
     for (let i = 0; i < bubbleCount; i++) {
-        bubbles.push(new Bubble());
+        const x = Math.random() * (canvas.width - bubbleSize * 2) + bubbleSize;
+        const y = Math.random() * (canvas.height - bubbleSize * 2) + bubbleSize;
+        bubbles.push(new Bubble(x, y));
     }
 }
 
@@ -53,11 +87,6 @@ function animate() {
     });
     requestAnimationFrame(animate);
 }
-
-bubbleImage.onload = () => {
-    init();
-    animate();
-};
 
 window.addEventListener('resize', () => {
     canvas.width = window.innerWidth;

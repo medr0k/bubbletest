@@ -135,13 +135,19 @@ class Bubble {
     }
 }
 
-function init() {
-    bubbles.length = 0; // Clear any existing bubbles
-    for (let i = 0; i < bubbleCount; i++) {
+function initBubbles() {
+    while (bubbles.length > bubbleCount) {
+        bubbles.pop(); // Remove extra bubbles
+    }
+    while (bubbles.length < bubbleCount) {
         const x = Math.random() * (canvas.width - bubbleSize * 2) + bubbleSize;
         const y = Math.random() * (canvas.height - bubbleSize * 2) + bubbleSize;
         bubbles.push(new Bubble(x, y));
     }
+}
+
+function init() {
+    initBubbles(); // Initialize bubbles
 }
 
 function animate() {
@@ -156,9 +162,12 @@ function animate() {
 window.addEventListener('resize', () => {
     canvas.width = window.innerWidth;
     canvas.height = window.innerHeight;
-    init(); // Reinitialize bubbles on resize
+    initBubbles(); // Reinitialize bubbles on resize
 });
 
-// Start the animation
+// Initialize bubbles twice at the start
 init();
+init();
+
+// Start the animation
 animate();

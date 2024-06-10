@@ -114,6 +114,10 @@ class Bubble {
     }
 
     draw() {
+        // Draw the original bubble image
+        ctx.globalAlpha = this.opacity;
+        ctx.drawImage(bubbleImage, this.x - this.radius, this.y - this.radius, this.radius * 2, this.radius * 2);
+        
         // Create an off-screen canvas
         const offCanvas = document.createElement('canvas');
         const offCtx = offCanvas.getContext('2d');
@@ -124,7 +128,7 @@ class Bubble {
         offCtx.drawImage(bubbleImage, 0, 0, this.radius * 2, this.radius * 2);
 
         // Apply hue rotation
-        offCtx.globalCompositeOperation = 'source-atop';
+        offCtx.globalCompositeOperation = 'source-in';
         offCtx.fillStyle = `hsl(${this.hue}, 100%, 50%)`;
         offCtx.fillRect(0, 0, offCanvas.width, offCanvas.height);
 

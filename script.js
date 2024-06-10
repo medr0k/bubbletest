@@ -17,8 +17,8 @@ bubbleImage.onerror = (error) => {
 };
 
 const bubbles = [];
-const bubbleCount = 25;
-const bubbleSize = 100; // Larger bubble size
+const bubbleCount = 20; // Reduced bubble count
+const bubbleSize = 80; // Smaller bubble size
 
 class Bubble {
     constructor(x, y) {
@@ -28,11 +28,15 @@ class Bubble {
         this.speedX = (Math.random() - 0.5) * 2;
         this.speedY = (Math.random() - 0.5) * 2;
         this.opacity = Math.random() * 0.5 + 0.5;
+        this.hue = Math.random() * 360; // Starting hue for color
+        this.hueChangeRate = 0.5; // Constant rate of hue change
     }
 
     update() {
         this.x += this.speedX;
         this.y += this.speedY;
+        this.hue += this.hueChangeRate; // Change hue over time
+        if (this.hue > 360) this.hue -= 360;
 
         // Boundary collision
         if (this.x - this.radius < 0) {
@@ -111,7 +115,20 @@ class Bubble {
 
     draw() {
         ctx.globalAlpha = this.opacity;
+
+        // Draw colored bubble
+        ctx.save();
+        ctx.beginPath();
+        ctx.arc(this.x, this.y, this.radius, 0, Math.PI * 2);
+        ctx.closePath();
+        ctx.clip();
+
+        ctx.fillStyle = `hsl(${this.hue}, 100%, 50%)`;
+        ctx.fillRect(this.x - this.radius, this.y - this.radius, this.radius * 2, this.radius * 2);
+
+        ctx.globalAlpha = 1;
         ctx.drawImage(bubbleImage, this.x - this.radius, this.y - this.radius, this.radius * 2, this.radius * 2);
+        ctx.restore();
     }
 }
 

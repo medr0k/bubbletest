@@ -54,22 +54,21 @@ class Bubble {
         this.hue += this.hueChangeRate; // Change hue over time
         if (this.hue > 360) this.hue -= 360;
 
-        // Boundary collision with phasing further into the wall
-        const phaseDistance = this.radius / 2; // Extend the phasing distance to half radius
-        if (this.x - phaseDistance < 0) {
-            this.x = phaseDistance;
+        // Boundary collision
+        if (this.x - this.radius < 0) {
+            this.x = this.radius;
             this.speedX = -this.speedX;
         }
-        if (this.x + phaseDistance > canvas.width) {
-            this.x = canvas.width - phaseDistance;
+        if (this.x + this.radius > canvas.width) {
+            this.x = canvas.width - this.radius;
             this.speedX = -this.speedX;
         }
-        if (this.y - phaseDistance < 0) {
-            this.y = phaseDistance;
+        if (this.y - this.radius < 0) {
+            this.y = this.radius;
             this.speedY = -this.speedY;
         }
-        if (this.y + phaseDistance > canvas.height) {
-            this.y = canvas.height - phaseDistance;
+        if (this.y + this.radius > canvas.height) {
+            this.y = canvas.height - this.radius;
             this.speedY = -this.speedY;
         }
 

@@ -17,7 +17,7 @@ bubbleImage.onerror = (error) => {
 };
 
 const bubbles = [];
-const bubbleCount = 20; // Reduced bubble count
+const bubbleCount = 21; // Reduced bubble count
 const bubbleSize = 80; // Smaller bubble size
 
 class Bubble {

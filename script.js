@@ -19,6 +19,7 @@ bubbleImage.onerror = (error) => {
 const bubbles = [];
 const bubbleCount = 28; // Reduced bubble count
 const bubbleSize = 70; // Smaller bubble size
+const phasedistanse = 50; // Distance at which bubbles start to phase out
 
 const gravityDirections = [
     { x: 0, y: -1 }, // Up

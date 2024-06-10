@@ -2,13 +2,14 @@ body, html {
     margin: 0;
     padding: 0;
     overflow: hidden;
-    background: #000;
-    height: 100%;
     width: 100%;
+    height: 100%;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    background: linear-gradient(to bottom, #000046, #1cb5e0);
 }
 
 canvas {
     display: block;
-    width: 100%;
-    height: 100%;
 }

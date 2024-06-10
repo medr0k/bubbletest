@@ -17,7 +17,7 @@ bubbleImage.onerror = (error) => {
 };
 
 const bubbles = [];
-const bubbleCount = 21; // Reduced bubble count
+const bubbleCount = 20; // Reduced bubble count
 const bubbleSize = 80; // Smaller bubble size
 
 class Bubble {
@@ -25,8 +25,8 @@ class Bubble {
         this.radius = bubbleSize;
         this.x = x;
         this.y = y;
-        this.speedX = (Math.random() - 0.5) * 4;
-        this.speedY = (Math.random() - 0.5) * 4;
+        this.speedX = (Math.random() - 0.5) * 6;
+        this.speedY = (Math.random() - 0.5) * 6;
         this.opacity = Math.random() * 0.5 + 0.5;
         this.hue = Math.random() * 360; // Starting hue for color
         this.hueChangeRate = 0.5; // Constant rate of hue change
@@ -116,39 +116,16 @@ class Bubble {
     draw() {
         ctx.globalAlpha = this.opacity;
         ctx.save();
-        ctx.beginPath();
-        ctx.arc(this.x, this.y, this.radius, 0, Math.PI * 2);
-        ctx.closePath();
-        ctx.clip();
+        ctx.translate(this.x, this.y);
+        ctx.rotate((Math.random() - 0.5) * 0.1); // Slight rotation for visual effect
+        ctx.translate(-this.x, -this.y);
 
-        // Draw colored bubble image
-        ctx.drawImage(this.createColoredImage(), this.x - this.radius, this.y - this.radius, this.radius * 2, this.radius * 2);
+        // Draw bubble with hue shift
+        ctx.filter = `hue-rotate(${this.hue}deg)`;
+        ctx.drawImage(bubbleImage, this.x - this.radius, this.y - this.radius, this.radius * 2, this.radius * 2);
+
         ctx.restore();
         ctx.globalAlpha = 1;
-    }
-
-    createColoredImage() {
-        const offScreenCanvas = document.createElement('canvas');
-        offScreenCanvas.width = bubbleImage.width;
-        offScreenCanvas.height = bubbleImage.height;
-        const offCtx = offScreenCanvas.getContext('2d');
-
-        offCtx.drawImage(bubbleImage, 0, 0);
-        const imageData = offCtx.getImageData(0, 0, offScreenCanvas.width, offScreenCanvas.height);
-        const data = imageData.data;
-
-        for (let i = 0; i < data.length; i += 4) {
-            const grayscale = data[i]; // Since R=G=B, we can take any component
-            const hsv = [this.hue / 360, 1, grayscale / 255];
-            const rgb = hsvToRgb(hsv[0], hsv[1], hsv[2]);
-
-            data[i] = rgb[0];
-            data[i + 1] = rgb[1];
-            data[i + 2] = rgb[2];
-        }
-
-        offCtx.putImageData(imageData, 0, 0);
-        return offScreenCanvas;
     }
 }
 

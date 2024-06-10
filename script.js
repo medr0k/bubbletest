@@ -18,7 +18,7 @@ bubbleImage.onerror = (error) => {
 
 const bubbles = [];
 const bubbleCount = 25;
-const bubbleSize = 40;
+const bubbleSize = 100; // Larger bubble size
 
 class Bubble {
     constructor(x, y) {
@@ -35,25 +35,28 @@ class Bubble {
         this.y += this.speedY;
 
         // Boundary collision
-        if (this.x - this.radius < 0 || this.x + this.radius > canvas.width) {
+        if (this.x - this.radius < 0) {
+            this.x = this.radius;
             this.speedX = -this.speedX;
         }
-
-        if (this.y - this.radius < 0 || this.y + this.radius > canvas.height) {
+        if (this.x + this.radius > canvas.width) {
+            this.x = canvas.width - this.radius;
+            this.speedX = -this.speedX;
+        }
+        if (this.y - this.radius < 0) {
+            this.y = this.radius;
+            this.speedY = -this.speedY;
+        }
+        if (this.y + this.radius > canvas.height) {
+            this.y = canvas.height - this.radius;
             this.speedY = -this.speedY;
         }
 
         // Bubble collision
         for (let other of bubbles) {
             if (this !== other && this.isCollidingWith(other)) {
-                const angle = Math.atan2(this.y - other.y, this.x - other.x);
-                const speed = Math.sqrt(this.speedX * this.speedX + this.speedY * this.speedY);
-
-                this.speedX = -Math.cos(angle) * speed;
-                this.speedY = -Math.sin(angle) * speed;
-
-                other.speedX = Math.cos(angle) * speed;
-                other.speedY = Math.sin(angle) * speed;
+                // Resolve collision
+                this.resolveCollision(other);
             }
         }
     }
@@ -63,6 +66,47 @@ class Bubble {
         const dy = this.y - other.y;
         const distance = Math.sqrt(dx * dx + dy * dy);
         return distance < this.radius + other.radius;
+    }
+
+    resolveCollision(other) {
+        const dx = this.x - other.x;
+        const dy = this.y - other.y;
+        const distance = Math.sqrt(dx * dx + dy * dy);
+
+        // Normal vector
+        const nx = dx / distance;
+        const ny = dy / distance;
+
+        // Tangent vector
+        const tx = -ny;
+        const ty = nx;
+
+        // Dot product tangent
+        const dpTan1 = this.speedX * tx + this.speedY * ty;
+        const dpTan2 = other.speedX * tx + other.speedY * ty;
+
+        // Dot product normal
+        const dpNorm1 = this.speedX * nx + this.speedY * ny;
+        const dpNorm2 = other.speedX * nx + other.speedY * ny;
+
+        // Conservation of momentum in 1D
+        const m1 = (dpNorm1 * (this.radius - other.radius) + 2 * other.radius * dpNorm2) / (this.radius + other.radius);
+        const m2 = (dpNorm2 * (other.radius - this.radius) + 2 * this.radius * dpNorm1) / (this.radius + other.radius);
+
+        this.speedX = tx * dpTan1 + nx * m1;
+        this.speedY = ty * dpTan1 + ny * m1;
+        other.speedX = tx * dpTan2 + nx * m2;
+        other.speedY = ty * dpTan2 + ny * m2;
+
+        // Separate the bubbles to avoid overlap
+        const overlap = this.radius + other.radius - distance;
+        const smallShiftX = (nx * overlap) / 2;
+        const smallShiftY = (ny * overlap) / 2;
+
+        this.x += smallShiftX;
+        this.y += smallShiftY;
+        other.x -= smallShiftX;
+        other.y -= smallShiftY;
     }
 
     draw() {

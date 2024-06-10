@@ -25,8 +25,8 @@ class Bubble {
         this.radius = bubbleSize;
         this.x = x;
         this.y = y;
-        this.speedX = 10; // Increased speed range
-        this.speedY = 10; // Increased speed range
+        this.speedX = 4; // Increased speed range
+        this.speedY = 4; // Increased speed range
         this.opacity = Math.random() * 0.5 + 0.5;
         this.hue = Math.random() * 360; // Starting hue for color
         this.hueChangeRate = 0.5; // Constant rate of hue change

@@ -20,7 +20,19 @@ const bubbles = [];
 const bubbleCount = 20; // Reduced bubble count
 const bubbleSize = 80; // Smaller bubble size
 
-let gravityDirection = 1; // 1 means up, -1 means down
+const gravityDirections = [
+    { x: 0, y: -1 }, // Up
+    { x: 0, y: 1 }, // Down
+    { x: -1, y: 0 }, // Left
+    { x: 1, y: 0 }, // Right
+    { x: -1, y: -1 }, // Up-left
+    { x: 1, y: -1 }, // Up-right
+    { x: -1, y: 1 }, // Down-left
+    { x: 1, y: 1 }, // Down-right
+];
+
+let currentGravityDirection = { x: 0, y: -1 }; // Starting direction
+let lastGravityDirectionIndex = 0; // Index of the last gravity direction
 
 class Bubble {
     constructor(x, y) {
@@ -35,8 +47,8 @@ class Bubble {
     }
 
     update() {
-        this.x += this.speedX;
-        this.y += this.speedY * gravityDirection;
+        this.x += this.speedX + currentGravityDirection.x * 0.5;
+        this.y += this.speedY + currentGravityDirection.y * 0.5;
         this.hue += this.hueChangeRate; // Change hue over time
         if (this.hue > 360) this.hue -= 360;
 
@@ -162,7 +174,14 @@ function animate() {
 }
 
 function changeGravityDirection() {
-    gravityDirection *= -1;
+    let newGravityDirectionIndex;
+    do {
+        newGravityDirectionIndex = Math.floor(Math.random() * gravityDirections.length);
+    } while (newGravityDirectionIndex === lastGravityDirectionIndex);
+
+    currentGravityDirection = gravityDirections[newGravityDirectionIndex];
+    lastGravityDirectionIndex = newGravityDirectionIndex;
+
     setTimeout(changeGravityDirection, 5000); // Change direction every 5 seconds
 }
 

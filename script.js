@@ -54,8 +54,8 @@ class Bubble {
         this.hue += this.hueChangeRate; // Change hue over time
         if (this.hue > 360) this.hue -= 360;
 
-        // Extended boundary collision with phasing further into the wall
-        const phaseDistance = this.radius; // Extend the phasing distance to full radius
+        // Boundary collision with phasing further into the wall
+        const phaseDistance = this.radius / 2; // Extend the phasing distance to half radius
         if (this.x - phaseDistance < 0) {
             this.x = phaseDistance;
             this.speedX = -this.speedX;
@@ -131,64 +131,40 @@ class Bubble {
     }
 
     draw() {
+        // Create an off-screen canvas
+        const offCanvas = document.createElement('canvas');
+        const offCtx = offCanvas.getContext('2d');
+        offCanvas.width = this.radius * 2;
+        offCanvas.height = this.radius * 2;
+
+        // Draw the image onto the off-screen canvas
+        offCtx.drawImage(bubbleImage, 0, 0, this.radius * 2, this.radius * 2);
+
+        // Apply hue rotation
+        offCtx.globalCompositeOperation = 'source-in';
+        offCtx.fillStyle = `hsl(${this.hue}, 100%, 50%)`;
+        offCtx.fillRect(0, 0, offCanvas.width, offCanvas.height);
+
+        // Draw the off-screen canvas onto the main canvas
         ctx.globalAlpha = this.opacity;
-
-        // Save the current canvas state
-        ctx.save();
-
-        // Draw the bubble with color overlay
-        ctx.translate(this.x, this.y);
-        ctx.rotate((this.hue % 360) * Math.PI / 180);
-        ctx.drawImage(bubbleImage, -this.radius, -this.radius, this.radius * 2, this.radius * 2);
-
-        // Restore the previous canvas state
-        ctx.restore();
-
+        ctx.drawImage(offCanvas, this.x - this.radius, this.y - this.radius);
         ctx.globalAlpha = 1; // Reset alpha
     }
 }
 
-function hsvToRgb(h, s, v) {
-    let r, g, b;
-
-    const i = Math.floor(h * 6);
-    const f = h * 6 - i;
-    const p = v * (1 - s);
-    const q = v * (1 - f * s);
-    const t = v * (1 - (1 - f) * s);
-
-    switch (i % 6) {
-        case 0:
-            r = v, g = t, b = p;
-            break;
-        case 1:
-            r = q, g = v, b = p;
-            break;
-        case 2:
-            r = p, g = v, b = t;
-            break;
-        case 3:
-            r = p, g = q, b = v;
-            break;
-        case 4:
-            r = t, g = p, b = v;
-            break;
-        case 5:
-            r = v, g = p, b = q;
-            break;
+function initBubbles() {
+    while (bubbles.length > bubbleCount) {
+        bubbles.pop(); // Remove extra bubbles
     }
-
-    return [Math.round(r * 255), Math.round(g * 255), Math.round(b * 255)];
-}
-
-function init() {
-    for (let i = 0; i < bubbleCount; i++) {
+    while (bubbles.length < bubbleCount) {
         const x = Math.random() * (canvas.width - bubbleSize * 2) + bubbleSize;
         const y = Math.random() * (canvas.height - bubbleSize * 2) + bubbleSize;
         bubbles.push(new Bubble(x, y));
     }
-    // Ensure exactly 20 bubbles
-    ensureExactBubbleCount(28);
+}
+
+function init() {
+    initBubbles(); // Initialize bubbles
 }
 
 function animate() {
@@ -197,50 +173,51 @@ function animate() {
         bubble.update();
         bubble.draw();
     });
+    updateGravityDirection();
     requestAnimationFrame(animate);
 }
 
-function changeGravity() {
-    // Smooth transition towards target gravity direction
-    if (currentGravityDirection.x !== targetGravityDirection.x || currentGravityDirection.y !== targetGravityDirection.y) {
-        currentGravityDirection.x += (targetGravityDirection.x - currentGravityDirection.x) * 0.05;
-        currentGravityDirection.y += (targetGravityDirection.y - currentGravityDirection.y) * 0.05;
-    } else {
-        gravityChangeInProgress = false; // Mark gravity change as complete
-    }
+function changeGravityDirection() {
+    let newGravityDirectionIndex;
+    do {
+        newGravityDirectionIndex = Math.floor(Math.random() * gravityDirections.length);
+    } while (newGravityDirectionIndex === lastGravityDirectionIndex);
 
-    // If a gravity change is not in progress, pick a new target direction
-    if (!gravityChangeInProgress) {
-        let newDirectionIndex;
-        do {
-            newDirectionIndex = Math.floor(Math.random() * gravityDirections.length);
-        } while (newDirectionIndex === lastGravityDirectionIndex);
-
-        lastGravityDirectionIndex = newDirectionIndex;
-        targetGravityDirection = gravityDirections[newDirectionIndex];
-        gravityChangeInProgress = true; // Mark gravity change as in progress
-    }
-
-    setTimeout(changeGravity, 5000); // Change gravity every 5 seconds
+    targetGravityDirection = gravityDirections[newGravityDirectionIndex];
+    lastGravityDirectionIndex = newGravityDirectionIndex;
 }
 
-function ensureExactBubbleCount(count) {
-    while (bubbles.length > count) {
-        bubbles.pop();
+function updateGravityDirection() {
+    const step = 0.01; // Adjust the step value to control the smoothness of the transition
+    const dx = targetGravityDirection.x - currentGravityDirection.x;
+    const dy = targetGravityDirection.y - currentGravityDirection.y;
+    
+    if (Math.abs(dx) > step) {
+        currentGravityDirection.x += step * Math.sign(dx);
+    } else {
+        currentGravityDirection.x = targetGravityDirection.x;
     }
-    while (bubbles.length < count) {
-        const x = Math.random() * (canvas.width - bubbleSize * 2) + bubbleSize;
-        const y = Math.random() * (canvas.height - bubbleSize * 2) + bubbleSize;
-        bubbles.push(new Bubble(x, y));
+    
+    if (Math.abs(dy) > step) {
+        currentGravityDirection.y += step * Math.sign(dy);
+    } else {
+        currentGravityDirection.y = targetGravityDirection.y;
     }
 }
 
 window.addEventListener('resize', () => {
     canvas.width = window.innerWidth;
     canvas.height = window.innerHeight;
-    ensureExactBubbleCount(28); // Re-check bubble count on resize
+    initBubbles(); // Reinitialize bubbles on resize
 });
 
-// Initial setup
-ensureExactBubbleCount(28); // Ensure 20 bubbles at start
-changeGravity(); // Start gravity change cycle
+// Initialize bubbles twice at the start
+init();
+init();
+
+// Start the animation
+animate();
+
+// Start changing gravity direction
+changeGravityDirection();
+setInterval(changeGravityDirection, 5000); // Change direction every 5 seconds

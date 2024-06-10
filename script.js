@@ -17,16 +17,18 @@ bubbleImage.onerror = (error) => {
 };
 
 const bubbles = [];
-const bubbleCount = 28; // Reduced bubble count
-const bubbleSize = 70; // Smaller bubble size
+const bubbleCount = 20; // Reduced bubble count
+const bubbleSize = 80; // Smaller bubble size
+
+let gravityDirection = 1; // 1 means up, -1 means down
 
 class Bubble {
     constructor(x, y) {
         this.radius = bubbleSize;
         this.x = x;
         this.y = y;
-        this.speedX = 1; // Reduced fixed speed for horizontal movement
-        this.speedY = 1; // Reduced fixed speed for vertical movement
+        this.speedX = (Math.random() - 0.5) * 2; // Random horizontal speed
+        this.speedY = (Math.random() - 0.5) * 2; // Random vertical speed
         this.opacity = Math.random() * 0.5 + 0.5;
         this.hue = Math.random() * 360; // Starting hue for color
         this.hueChangeRate = 0.5; // Constant rate of hue change
@@ -34,7 +36,7 @@ class Bubble {
 
     update() {
         this.x += this.speedX;
-        this.y += this.speedY;
+        this.y += this.speedY * gravityDirection;
         this.hue += this.hueChangeRate; // Change hue over time
         if (this.hue > 360) this.hue -= 360;
 
@@ -159,6 +161,11 @@ function animate() {
     requestAnimationFrame(animate);
 }
 
+function changeGravityDirection() {
+    gravityDirection *= -1;
+    setTimeout(changeGravityDirection, 5000); // Change direction every 5 seconds
+}
+
 window.addEventListener('resize', () => {
     canvas.width = window.innerWidth;
     canvas.height = window.innerHeight;
@@ -171,3 +178,6 @@ init();
 
 // Start the animation
 animate();
+
+// Start changing gravity direction
+changeGravityDirection();

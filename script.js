@@ -18,7 +18,7 @@ bubbleImage.onerror = (error) => {
 
 const bubbles = [];
 const bubbleCount = 20; // Reduced bubble count
-const bubbleSize = 50; // Smaller bubble size
+const bubbleSize = 80; // Smaller bubble size
 
 class Bubble {
     constructor(x, y) {
@@ -30,6 +30,31 @@ class Bubble {
         this.opacity = Math.random() * 0.5 + 0.5;
         this.hue = Math.random() * 360; // Starting hue for color
         this.hueChangeRate = 0.5; // Constant rate of hue change
+        this.coloredImage = this.createColoredImage();
+    }
+
+    createColoredImage() {
+        const offScreenCanvas = document.createElement('canvas');
+        offScreenCanvas.width = bubbleImage.width;
+        offScreenCanvas.height = bubbleImage.height;
+        const offCtx = offScreenCanvas.getContext('2d');
+
+        offCtx.drawImage(bubbleImage, 0, 0);
+        const imageData = offCtx.getImageData(0, 0, offScreenCanvas.width, offScreenCanvas.height);
+        const data = imageData.data;
+
+        for (let i = 0; i < data.length; i += 4) {
+            const grayscale = data[i]; // Since R=G=B, we can take any component
+            const hsv = [this.hue / 360, 1, grayscale / 255];
+            const rgb = hsvToRgb(hsv[0], hsv[1], hsv[2]);
+
+            data[i] = rgb[0];
+            data[i + 1] = rgb[1];
+            data[i + 2] = rgb[2];
+        }
+
+        offCtx.putImageData(imageData, 0, 0);
+        return offScreenCanvas;
     }
 
     update() {
@@ -37,6 +62,7 @@ class Bubble {
         this.y += this.speedY;
         this.hue += this.hueChangeRate; // Change hue over time
         if (this.hue > 360) this.hue -= 360;
+        this.coloredImage = this.createColoredImage();
 
         // Boundary collision
         if (this.x - this.radius < 0) {
@@ -115,20 +141,7 @@ class Bubble {
 
     draw() {
         ctx.globalAlpha = this.opacity;
-
-        // Draw colored bubble
-        ctx.save();
-        ctx.beginPath();
-        ctx.arc(this.x, this.y, this.radius, 0, Math.PI * 2);
-        ctx.closePath();
-        ctx.clip();
-
-        ctx.fillStyle = `hsl(${this.hue}, 100%, 50%)`;
-        ctx.fillRect(this.x - this.radius, this.y - this.radius, this.radius * 2, this.radius * 2);
-
-        ctx.globalAlpha = 1;
-        ctx.drawImage(bubbleImage, this.x - this.radius, this.y - this.radius, this.radius * 2, this.radius * 2);
-        ctx.restore();
+        ctx.drawImage(this.coloredImage, this.x - this.radius, this.y - this.radius, this.radius * 2, this.radius * 2);
     }
 }
 
@@ -147,6 +160,45 @@ function animate() {
         bubble.draw();
     });
     requestAnimationFrame(animate);
+}
+
+function rgbToHsv(r, g, b) {
+    r /= 255;
+    g /= 255;
+    b /= 255;
+    const max = Math.max(r, g, b), min = Math.min(r, g, b);
+    let h, s, v = max;
+    const d = max - min;
+    s = max === 0 ? 0 : d / max;
+    if (max === min) {
+        h = 0; // achromatic
+    } else {
+        switch (max) {
+            case r: h = (g - b) / d + (g < b ? 6 : 0); break;
+            case g: h = (b - r) / d + 2; break;
+            case b: h = (r - g) / d + 4; break;
+        }
+        h /= 6;
+    }
+    return [h, s, v];
+}
+
+function hsvToRgb(h, s, v) {
+    let r, g, b;
+    const i = Math.floor(h * 6);
+    const f = h * 6 - i;
+    const p = v * (1 - s);
+    const q = v * (1 - f * s);
+    const t = v * (1 - (1 - f) * s);
+    switch (i % 6) {
+        case 0: r = v, g = t, b = p; break;
+        case 1: r = q, g = v, b = p; break;
+        case 2: r = p, g = v, b = t; break;
+        case 3: r = p, g = q, b = v; break;
+        case 4: r = t, g = p, b = v; break;
+        case 5: r = v, g = p, b = q; break;
+    }
+    return [Math.round(r * 255), Math.round(g * 255), Math.round(b * 255)];
 }
 
 window.addEventListener('resize', () => {
